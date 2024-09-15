@@ -6,3 +6,4 @@ pandas
 apscheduler
 numpy
 schedule
+gunicorn
