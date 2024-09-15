@@ -1,0 +1,8 @@
+Flask
+line-bot-sdk
+pyimgur
+matplotlib
+pandas
+apscheduler
+numpy
+schedule
