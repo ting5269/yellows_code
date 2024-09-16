@@ -1138,10 +1138,8 @@ def handle_postback(event):
     def funactivityday(start_date):
         data = pd.read_csv('./dailyActivity.csv')
         df = pd.DataFrame(data)
-        #print(df)
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
         df.set_index('ActivityDate', inplace = True)
-        # specific_time = '2024-05-27'
         df_yesterday = df.loc[start_date]
 
         # 載入字體
@@ -1154,19 +1152,14 @@ def handle_postback(event):
         
         df2.set_index('ActivityDate', inplace = True)
         df2_yesterday = df2.loc[start_date]
-        #print(df2_yesterday)
-        #df2_yesterday.set_index('ActivityDate', inplace = True)
         StandUpAlert = df2_yesterday['StandUpAlert']
-        #print(StandUpAlert)
 
         #將數據間隔整理為固定1小時                
         df_hourly = df_yesterday.resample('h').sum()
         df_yesterday_hourly = df_yesterday.resample('h').sum()
 
-        matplotlib.rc('font', family='Microsoft JhengHei')
         plt.figure(figsize=(10, 6))
         bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03, color='#60b8b3')
-        #print(df_hourly['Step'])
 
         plt.xlabel('時間', fontproperties=my_font)
         plt.ylabel('步數', fontproperties=my_font)
@@ -1176,14 +1169,11 @@ def handle_postback(event):
         total_steps_yesterday = df_yesterday_hourly['Step'].sum()
         steps_difference = total_steps - total_steps_yesterday
 
-
         # Extract month and day for the title
         month = datetime.strptime(start_date, '%Y-%m-%d').month
         day = datetime.strptime(start_date, '%Y-%m-%d').day
         title_date = f'{month}月{day}日 活動'
-        # plt.title(f'昨日活動 (總步數: {total_steps:.0f})')
-        # Set the title
-        plt.title(title_date)
+        plt.title(title_date, fontproperties=my_font)
 
         # 自訂標籤：只顯示偶數小時的標籤
         plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=2))
@@ -1191,7 +1181,7 @@ def handle_postback(event):
 
         for bar in bars:
             height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10)
+            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10, fontproperties=my_font)
             
         plt.tight_layout() 
 
@@ -1208,13 +1198,11 @@ def handle_postback(event):
             summary_text3 = '恭喜你！你已經達成了8000步的目標。'
         else:
             summary_text3 = f'還差 {8000 - total_steps} 步就能達成目標8000步，繼續加油！'
-        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12)
-        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12)
-        plt.figtext(0.07, 0.05, summary_text3, ha='left', fontsize=12)
+        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12, fontproperties=my_font)
+        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12, fontproperties=my_font)
+        plt.figtext(0.07, 0.05, summary_text3, ha='left', fontsize=12, fontproperties=my_font)
         plt.subplots_adjust(bottom=0.3)
 
-        # output_path_activt_day="C:/Users/user/Desktop/image/report2.png"
-        # plt.savefig(output_path_activt_day, bbox_inches='tight')
         plt.savefig('report2.png')
         PATH = 'report2.png'
 
