@@ -1143,6 +1143,9 @@ def handle_postback(event):
         # specific_time = '2024-05-27'
         df_yesterday = df.loc[start_date]
 
+        # 載入字體
+        my_font = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf')
+        
         #抓久坐警示csv
         datawarning = pd.read_csv('./warning.csv')
         df2 = pd.DataFrame(datawarning)
@@ -1164,8 +1167,8 @@ def handle_postback(event):
         bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03, color='#60b8b3')
         #print(df_hourly['Step'])
 
-        plt.xlabel('時間') 
-        plt.ylabel('步數')
+        plt.xlabel('時間', fontproperties=my_font)
+        plt.ylabel('步數', fontproperties=my_font)
 
         #顯示總和步數
         total_steps = df_hourly['Step'].sum()
