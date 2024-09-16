@@ -1976,7 +1976,7 @@ def handle_postback(event):
                 # 找不到對應的日期，回應用戶
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,heartrateday。")
                     )
             elif report_type =="heartrateweek":
                 try:
@@ -1985,7 +1985,7 @@ def handle_postback(event):
                 except KeyError:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,heartrateweek。")
                     )
             elif report_type =="sleepday":
                 try:
@@ -1994,7 +1994,7 @@ def handle_postback(event):
                 except KeyError:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,sleepday。")
                     )
             elif report_type =="sleepweek":
                 try:
@@ -2003,7 +2003,7 @@ def handle_postback(event):
                 except KeyError:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,sleepweek。")
                     )
             elif report_type =="activityday":
                 try:
@@ -2012,7 +2012,7 @@ def handle_postback(event):
                 except KeyError:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,activityday。")
                     )
             elif report_type =="activityweek":
                 try:
@@ -2021,7 +2021,7 @@ def handle_postback(event):
                 except KeyError:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,activityweek。")
                     ) 
             elif report_type =="fatigueday":
                 try:
@@ -2030,7 +2030,7 @@ def handle_postback(event):
                 except KeyError:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,fatigueday。")
                     )
             elif report_type =="fatigueweek":
                 try:
@@ -2039,7 +2039,7 @@ def handle_postback(event):
                 except KeyError:
                     line_bot_api.reply_message(
                         event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據。")
+                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,fatigueweek。")
                     )
             elif report_type =="allreportday":
                 report_image_message1 =funfatigueday(start_date)     
