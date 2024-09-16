@@ -1225,74 +1225,86 @@ def handle_postback(event):
         )
         return activityday_image_message
     #周活動
-    def funactivityweek(start_date):
-
-        # Load step count CSV
-        data = pd.read_csv('./Activity.csv')
+    def funactivityday(start_date):
+        data = pd.read_csv('./dailyActivity.csv')
         df = pd.DataFrame(data)
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
-        df.set_index('ActivityDate', inplace=True)
+        df.set_index('ActivityDate', inplace = True)
+        df_yesterday = df.loc[start_date]
 
-        end_date = (datetime.strptime(start_date, '%Y-%m-%d') + timedelta(days=6)).strftime('%Y-%m-%d')
-        df_week = df.loc[start_date:end_date]
+        # 載入字體
+        my_font = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf')
+        
+        #抓久坐警示csv
+        datawarning = pd.read_csv('./warning.csv')
+        df2 = pd.DataFrame(datawarning)
+        df2['ActivityDate'] = pd.to_datetime(df2['ActivityDate'])
+        
+        df2.set_index('ActivityDate', inplace = True)
+        df2_yesterday = df2.loc[start_date]
+        StandUpAlert = df2_yesterday['StandUpAlert']
 
-        lastweek_start_date = (datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=7)).strftime('%Y-%m-%d')
-        lastweek_end_date = (datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
+        #將數據間隔整理為固定1小時                
+        df_hourly = df_yesterday.resample('h').sum()
+        df_yesterday_hourly = df_yesterday.resample('h').sum()
 
-        # Resample data to daily intervals
-        df_daliy = df_week.resample('d').sum()
-
-
-        df_prev_week = df.loc[lastweek_start_date:lastweek_end_date]
-        df_prev_week = df_prev_week.resample('d').sum()
-
-        avgStep_lastweek = int(np.average(df_prev_week['Step']))
-
-
-        matplotlib.rc('font', family='Microsoft JhengHei')
         plt.figure(figsize=(10, 6))
-        bars = plt.bar(df_daliy.index, df_daliy['Step'], width=0.8, align='center', color='#60b8b3')
+        bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03, color='#60b8b3')
 
-        plt.title('活動周報表')
-        plt.xlabel('日期')
-        plt.ylabel('步數')
+        plt.xlabel('時間', fontproperties=my_font)
+        plt.ylabel('步數', fontproperties=my_font)
 
-        # Calculate and plot the average step line
-        avgStep = int(np.average(df_daliy['Step']))
-        plt.axhline(y=avgStep, color='r', linestyle='--')
+        #顯示總和步數
+        total_steps = df_hourly['Step'].sum()
+        total_steps_yesterday = df_yesterday_hourly['Step'].sum()
+        steps_difference = total_steps - total_steps_yesterday
 
-        # Add text with a white background behind it
-        plt.text(df_daliy.index[-1], avgStep, f' 平均值: {avgStep}', color='black', va='bottom', ha='left', fontsize=12,
-                bbox=dict(facecolor='white', edgecolor='none', alpha=0.8))
+        # Extract month and day for the title
+        month = datetime.strptime(start_date, '%Y-%m-%d').month
+        day = datetime.strptime(start_date, '%Y-%m-%d').day
+        title_date = f'{month}月{day}日 活動'
+        plt.title(title_date, fontproperties=my_font)
 
-        # Add bar labels
+        # 自訂標籤：只顯示偶數小時的標籤
+        plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=2))
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # 格式化為 時:分 的形式
+
         for bar in bars:
             height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10)
+            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10, fontproperties=my_font)
+            
+        plt.tight_layout() 
 
-        summary_text1 = ''
-        avgStepDif = avgStep - avgStep_lastweek
-        if avgStepDif > 0:
-            summary_text1 = f"平均步數比上禮拜多了{avgStepDif}步，繼續保持!"
-        elif avgStepDif <= 0:
-            summary_text1 = f"平均步數比上禮拜少了{-avgStepDif}步，動起來吧！健康生活從多走一步開始。"
-        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12)
-        plt.tight_layout()
+        summary_text1 = f'昨日久坐提醒: {StandUpAlert} 次'
+
+        if steps_difference > 0:
+            summary_text2 = f'總步數: {total_steps:.0f}步，比前一天多了 {steps_difference} 步。'
+        else:
+            summary_text2 = f'總步數: {total_steps:.0f}步，比前一天少了 {-steps_difference} 步。'
+
+        if total_steps >= 8000 and StandUpAlert == 0:
+            summary_text3 = '恭喜你！你已經達成了8000步的目標。繼續保持這種健康的生活方式，你的身體會感謝你的！'
+        elif total_steps >= 8000 and StandUpAlert > 0: 
+            summary_text3 = '恭喜你！你已經達成了8000步的目標。'
+        else:
+            summary_text3 = f'還差 {8000 - total_steps} 步就能達成目標8000步，繼續加油！'
+        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12, fontproperties=my_font)
+        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12, fontproperties=my_font)
+        plt.figtext(0.07, 0.05, summary_text3, ha='left', fontsize=12, fontproperties=my_font)
         plt.subplots_adjust(bottom=0.3)
-        # plt.grid(True)
-        # plt.legend()
-        plt.savefig('reportActivityweek.png')
+
+        plt.savefig('report2.png')
+        PATH = './report2.png'
 
         im = pyimgur.Imgur(CLIENT_ID)
-        PATH = 'reportActivityweek.png'
         uploaded_image = im.upload_image(PATH, title=plt.title)
         #儲存imgur連結
-        activityweekimgurl = uploaded_image.link
-        activityweekimage_message = ImageSendMessage(
-        original_content_url=activityweekimgurl,
-        preview_image_url=activityweekimgurl
+        activitydayimgurl = uploaded_image.link
+        activityday_image_message = ImageSendMessage(
+        original_content_url=activitydayimgurl,
+        preview_image_url=activitydayimgurl
         )
-        return activityweekimage_message
+        return activityday_image_message
     #日疲勞
     def funfatigueday(start_date):
         # 抓疲勞csv
