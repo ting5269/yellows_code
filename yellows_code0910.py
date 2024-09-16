@@ -1212,7 +1212,7 @@ def handle_postback(event):
         # output_path_activt_day="C:/Users/user/Desktop/image/report2.png"
         # plt.savefig(output_path_activt_day, bbox_inches='tight')
         plt.savefig('report2.png')
-        PATH = 'report2.png'
+        PATH = './report2.png'
 
         im = pyimgur.Imgur(CLIENT_ID)
         uploaded_image = im.upload_image(PATH, title=plt.title)
