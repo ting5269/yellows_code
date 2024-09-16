@@ -25,8 +25,7 @@ from matplotlib import rcParams
 from threading import Lock
 from apscheduler.schedulers.background import BackgroundScheduler
 from linebot.models import TextSendMessage, MessageEvent, TextMessage,DatetimePickerAction, TemplateSendMessage, ButtonsTemplate,FlexSendMessage
-import matplotlib.font_manager as fm
-from matplotlib.font_manager import FontProperties
+
 
 CLIENT_ID = "122aba7e3e3f13a"
 PATH = 'report2.png'
@@ -34,8 +33,8 @@ gettime = "08:00" #先定義一個初始值
 
 app = Flask(__name__)
 
-line_bot_api = LineBotApi("gqHpZtd1vx5rrSoMSv12HUSx+fFw9lTKfAAuDgQDDdcNMOpA3jKEbC/gAquc4JGBvWomMnloLp8/40rNFdCQkm4f6v1kte5s1+76wS+9kQ/uPaQGTvyUAVehqo+BtanPV4GGasN+ICKchMKhpUoPlAdB04t89/1O/w1cDnyilFU=")
-handler = WebhookHandler("9a31037c985e085e319ec091700885c8")
+line_bot_api = LineBotApi("hgVbOhZMw2/oD0qF2J0QfxKxORrJkPBwOF5U4eUiAco6RvekIkowfrmflmHVIgZaGRMuzG5iyC9cbt2Ky1reORDQjmZ8vLWRAJ5z89NkUnsC+6QNtNITEar4ZGmKprgek4ld2+4L4FbOOD5mvGlBEgdB04t89/1O/w1cDnyilFU=")
+handler = WebhookHandler("77f346a70c6e426bae3071c237647c95")
 
 @ app.route("/callback", methods=['POST'])
 def callback():
@@ -444,19 +443,19 @@ def handle_message(event):
     elif event.message.text == "早上8:00傳送報表":
         global gettime
         gettime = "08:00"
-        with open("C:/Users/user/Desktop/LineBot_Old/user_ids.txt", "a") as file:
+        with open("./user_ids.txt", "a") as file:
             file.write(user_id + "," + gettime + "\n")
     elif event.message.text == "中午12:00傳送報表":
         gettime = "12:00"
-        with open("C:/Users/user/Desktop/LineBot_Old/user_ids.txt", "a") as file:
+        with open("./user_ids.txt", "a") as file:
             file.write(user_id + "," + gettime + "\n")
     elif event.message.text == "下午16:00傳送報表":
         gettime = "16:00"
-        with open("C:/Users/user/Desktop/LineBot_Old/user_ids.txt", "a") as file:
+        with open("./user_ids.txt", "a") as file:
             file.write(user_id + "," + gettime + "\n")
     elif event.message.text == "晚上20:00傳送報表":
         gettime = "20:00"
-        with open("C:/Users/user/Desktop/LineBot_Old/user_ids.txt", "a") as file:
+        with open("./user_ids.txt", "a") as file:
             file.write(user_id + "," + gettime + "\n")
     elif event.message.text == 'QA': #QA快速選單內容
         message = TextSendMessage(
@@ -1213,7 +1212,7 @@ def handle_postback(event):
         # output_path_activt_day="C:/Users/user/Desktop/image/report2.png"
         # plt.savefig(output_path_activt_day, bbox_inches='tight')
         plt.savefig('report2.png')
-        PATH = './report2.png'
+        PATH = 'report2.png'
 
         im = pyimgur.Imgur(CLIENT_ID)
         uploaded_image = im.upload_image(PATH, title=plt.title)
@@ -1225,86 +1224,74 @@ def handle_postback(event):
         )
         return activityday_image_message
     #周活動
-    def funactivityday(start_date):
-        data = pd.read_csv('./dailyActivity.csv')
+    def funactivityweek(start_date):
+
+        # Load step count CSV
+        data = pd.read_csv('./Activity.csv')
         df = pd.DataFrame(data)
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
-        df.set_index('ActivityDate', inplace = True)
-        df_yesterday = df.loc[start_date]
+        df.set_index('ActivityDate', inplace=True)
 
-        # 載入字體
-        my_font = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf')
-        
-        #抓久坐警示csv
-        datawarning = pd.read_csv('./warning.csv')
-        df2 = pd.DataFrame(datawarning)
-        df2['ActivityDate'] = pd.to_datetime(df2['ActivityDate'])
-        
-        df2.set_index('ActivityDate', inplace = True)
-        df2_yesterday = df2.loc[start_date]
-        StandUpAlert = df2_yesterday['StandUpAlert']
+        end_date = (datetime.strptime(start_date, '%Y-%m-%d') + timedelta(days=6)).strftime('%Y-%m-%d')
+        df_week = df.loc[start_date:end_date]
 
-        #將數據間隔整理為固定1小時                
-        df_hourly = df_yesterday.resample('h').sum()
-        df_yesterday_hourly = df_yesterday.resample('h').sum()
+        lastweek_start_date = (datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=7)).strftime('%Y-%m-%d')
+        lastweek_end_date = (datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
 
+        # Resample data to daily intervals
+        df_daliy = df_week.resample('d').sum()
+
+
+        df_prev_week = df.loc[lastweek_start_date:lastweek_end_date]
+        df_prev_week = df_prev_week.resample('d').sum()
+
+        avgStep_lastweek = int(np.average(df_prev_week['Step']))
+
+
+        matplotlib.rc('font', family='Microsoft JhengHei')
         plt.figure(figsize=(10, 6))
-        bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03, color='#60b8b3')
+        bars = plt.bar(df_daliy.index, df_daliy['Step'], width=0.8, align='center', color='#60b8b3')
 
-        plt.xlabel('時間', fontproperties=my_font)
-        plt.ylabel('步數', fontproperties=my_font)
+        plt.title('活動周報表')
+        plt.xlabel('日期')
+        plt.ylabel('步數')
 
-        #顯示總和步數
-        total_steps = df_hourly['Step'].sum()
-        total_steps_yesterday = df_yesterday_hourly['Step'].sum()
-        steps_difference = total_steps - total_steps_yesterday
+        # Calculate and plot the average step line
+        avgStep = int(np.average(df_daliy['Step']))
+        plt.axhline(y=avgStep, color='r', linestyle='--')
 
-        # Extract month and day for the title
-        month = datetime.strptime(start_date, '%Y-%m-%d').month
-        day = datetime.strptime(start_date, '%Y-%m-%d').day
-        title_date = f'{month}月{day}日 活動'
-        plt.title(title_date, fontproperties=my_font)
+        # Add text with a white background behind it
+        plt.text(df_daliy.index[-1], avgStep, f' 平均值: {avgStep}', color='black', va='bottom', ha='left', fontsize=12,
+                bbox=dict(facecolor='white', edgecolor='none', alpha=0.8))
 
-        # 自訂標籤：只顯示偶數小時的標籤
-        plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=2))
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # 格式化為 時:分 的形式
-
+        # Add bar labels
         for bar in bars:
             height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10, fontproperties=my_font)
-            
-        plt.tight_layout() 
+            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10)
 
-        summary_text1 = f'昨日久坐提醒: {StandUpAlert} 次'
-
-        if steps_difference > 0:
-            summary_text2 = f'總步數: {total_steps:.0f}步，比前一天多了 {steps_difference} 步。'
-        else:
-            summary_text2 = f'總步數: {total_steps:.0f}步，比前一天少了 {-steps_difference} 步。'
-
-        if total_steps >= 8000 and StandUpAlert == 0:
-            summary_text3 = '恭喜你！你已經達成了8000步的目標。繼續保持這種健康的生活方式，你的身體會感謝你的！'
-        elif total_steps >= 8000 and StandUpAlert > 0: 
-            summary_text3 = '恭喜你！你已經達成了8000步的目標。'
-        else:
-            summary_text3 = f'還差 {8000 - total_steps} 步就能達成目標8000步，繼續加油！'
-        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12, fontproperties=my_font)
-        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12, fontproperties=my_font)
-        plt.figtext(0.07, 0.05, summary_text3, ha='left', fontsize=12, fontproperties=my_font)
+        summary_text1 = ''
+        avgStepDif = avgStep - avgStep_lastweek
+        if avgStepDif > 0:
+            summary_text1 = f"平均步數比上禮拜多了{avgStepDif}步，繼續保持!"
+        elif avgStepDif <= 0:
+            summary_text1 = f"平均步數比上禮拜少了{-avgStepDif}步，動起來吧！健康生活從多走一步開始。"
+        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12)
+        plt.tight_layout()
         plt.subplots_adjust(bottom=0.3)
-
-        plt.savefig('report2.png')
-        PATH = './report2.png'
+        # plt.grid(True)
+        # plt.legend()
+        plt.savefig('reportActivityweek.png')
 
         im = pyimgur.Imgur(CLIENT_ID)
+        PATH = 'reportActivityweek.png'
         uploaded_image = im.upload_image(PATH, title=plt.title)
         #儲存imgur連結
-        activitydayimgurl = uploaded_image.link
-        activityday_image_message = ImageSendMessage(
-        original_content_url=activitydayimgurl,
-        preview_image_url=activitydayimgurl
+        activityweekimgurl = uploaded_image.link
+        activityweekimage_message = ImageSendMessage(
+        original_content_url=activityweekimgurl,
+        preview_image_url=activityweekimgurl
         )
-        return activityday_image_message
+        return activityweekimage_message
     #日疲勞
     def funfatigueday(start_date):
         # 抓疲勞csv
@@ -2389,5 +2376,4 @@ if __name__ == "__main__":
     schedule_thread.start()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
 
