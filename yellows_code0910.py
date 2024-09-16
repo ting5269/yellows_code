@@ -25,7 +25,7 @@ from matplotlib import rcParams
 from threading import Lock
 from apscheduler.schedulers.background import BackgroundScheduler
 from linebot.models import TextSendMessage, MessageEvent, TextMessage,DatetimePickerAction, TemplateSendMessage, ButtonsTemplate,FlexSendMessage
-
+import matplotlib.font_manager as fm
 
 CLIENT_ID = "122aba7e3e3f13a"
 PATH = 'report2.png'
