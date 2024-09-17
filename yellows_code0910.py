@@ -1138,6 +1138,7 @@ def handle_postback(event):
     def funactivityday(start_date):
         data = pd.read_csv('./dailyActivity.csv')
         df = pd.DataFrame(data)
+        print(df)
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
         df.set_index('ActivityDate', inplace = True)
         df_yesterday = df.loc[start_date]
@@ -1151,7 +1152,10 @@ def handle_postback(event):
         
         df2.set_index('ActivityDate', inplace = True)
         df2_yesterday = df2.loc[start_date]
+        print(df2_yesterday)
+        df2_yesterday.set_index('ActivityDate', inplace = True)
         StandUpAlert = df2_yesterday['StandUpAlert']
+        print(StandUpAlert)
 
         #將數據間隔整理為固定1小時                
         df_hourly = df_yesterday.resample('h').sum()
@@ -1159,6 +1163,7 @@ def handle_postback(event):
 
         plt.figure(figsize=(10, 6))
         bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03, color='#60b8b3')
+        print(df_hourly['Step'])
 
         plt.xlabel('時間', fontproperties=font_prop)
         plt.ylabel('步數', fontproperties=font_prop)
