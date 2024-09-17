@@ -1,7 +1,6 @@
 import os
 import csv
 from linebot.api import LineBotApiError
-import math
 import numpy as np
 from datetime import datetime, timedelta
 import matplotlib
@@ -24,9 +23,10 @@ import re
 from matplotlib import rcParams
 from threading import Lock
 from apscheduler.schedulers.background import BackgroundScheduler
-from linebot.models import TextSendMessage, MessageEvent, TextMessage,DatetimePickerAction, TemplateSendMessage, ButtonsTemplate,FlexSendMessage
-import matplotlib.font_manager as fm
+from linebot.models import TextSendMessage, MessageEvent, TextMessage,DatetimePickerAction, TemplateSendMessage, ButtonsTemplate
+
 from matplotlib.font_manager import FontProperties
+import matplotlib.font_manager as fm
 
 CLIENT_ID = "122aba7e3e3f13a"
 PATH = 'report2.png'
@@ -34,8 +34,8 @@ gettime = "08:00" #先定義一個初始值
 
 app = Flask(__name__)
 
-line_bot_api = LineBotApi("hgVbOhZMw2/oD0qF2J0QfxKxORrJkPBwOF5U4eUiAco6RvekIkowfrmflmHVIgZaGRMuzG5iyC9cbt2Ky1reORDQjmZ8vLWRAJ5z89NkUnsC+6QNtNITEar4ZGmKprgek4ld2+4L4FbOOD5mvGlBEgdB04t89/1O/w1cDnyilFU=")
-handler = WebhookHandler("77f346a70c6e426bae3071c237647c95")
+line_bot_api = LineBotApi("+vszRtjsTxuPM6653PLxHCoGzgbRMKVkTOd8XwdbIlpQ1cqv8LQ3z2F5C2Zdi2hMvWomMnloLp8/40rNFdCQkm4f6v1kte5s1+76wS+9kQ+M1rtvBVjujh12WpDB1Qc9Z/2NpB+NX5D3THH76HDAYwdB04t89/1O/w1cDnyilFU=")
+handler = WebhookHandler("9a31037c985e085e319ec091700885c8")
 
 @ app.route("/callback", methods=['POST'])
 def callback():
@@ -60,10 +60,6 @@ def handle_message(event):
     user_message = event.message.text.strip()  # 獲取並去除前後空格的消息
     users = load_user_data()  # 從 CSV 加載使用者資料
     user_record = next((user for user in users if user['uid'] == user_id), None)  # 查找當前使用者的記錄
-    answer = qa_dict.get(user_message, None)  
-    if answer:
-        response_message = TextSendMessage(text=answer)
-        line_bot_api.reply_message(event.reply_token, response_message)
 
     if user_message.lower() == "start":
         if user_record:
@@ -444,49 +440,20 @@ def handle_message(event):
     elif event.message.text == "早上8:00傳送報表":
         global gettime
         gettime = "08:00"
-        with open("./user_ids.txt", "a") as file:
+        with open("C:/Users/user/Desktop/LineBot/user_ids.txt", "w") as file:
             file.write(user_id + "," + gettime + "\n")
     elif event.message.text == "中午12:00傳送報表":
         gettime = "12:00"
-        with open("./user_ids.txt", "a") as file:
+        with open("C:/Users/user/Desktop/LineBot/user_ids.txt", "w") as file:
             file.write(user_id + "," + gettime + "\n")
     elif event.message.text == "下午16:00傳送報表":
         gettime = "16:00"
-        with open("./user_ids.txt", "a") as file:
+        with open("C:/Users/user/Desktop/LineBot/user_ids.txt", "w") as file:
             file.write(user_id + "," + gettime + "\n")
     elif event.message.text == "晚上20:00傳送報表":
         gettime = "20:00"
-        with open("./user_ids.txt", "a") as file:
+        with open("C:/Users/user/Desktop/LineBot/user_ids.txt", "w") as file:
             file.write(user_id + "," + gettime + "\n")
-    elif event.message.text == 'QA': #QA快速選單內容
-        message = TextSendMessage(
-        text='請選擇一個選項',
-        quick_reply=QuickReply(
-            items=[
-                QuickReplyButton(
-                    action=MessageAction(label="心率", text="心率常見問題")
-                ),
-                QuickReplyButton(
-                    action=MessageAction(label="睡眠", text="睡眠常見問題")
-                ),
-                QuickReplyButton(
-                    action=MessageAction(label="活動", text="活動常見問題")
-                ),
-                QuickReplyButton(
-                    action=MessageAction(label="疲勞", text="疲勞常見問題")
-                )
-            ]
-        )
-        )
-        line_bot_api.reply_message(event.reply_token, message)
-    elif event.message.text == '睡眠常見問題':
-        flex_sleep_qa(event)
-    elif event.message.text == '心率常見問題':
-        flex_hr_qa(event)
-    elif event.message.text == '活動常見問題':
-        flex_activity_qa(event)
-    elif event.message.text == '疲勞常見問題':
-        flex_fatigue_qa(event)
     else : 
         msg2 = (TextSendMessage(text='失敗'))
         line_bot_api.reply_message(event.reply_token, msg2)
@@ -540,7 +507,7 @@ def remove_all_badges(event):
         )
 def send_today_steps(event):
     try:
-        data = pd.read_csv("./dailyActivity.csv")
+        data = pd.read_csv("./Activity.csv")
         df = pd.DataFrame(data)
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
         df.set_index('ActivityDate', inplace=True)
@@ -687,7 +654,7 @@ def send_10000_steps_badge(event):
 def check_and_send_badges():
     try:
         # 讀取CSV文件創建DataFrame
-        data = pd.read_csv('./dailyActivity.csv')
+        data = pd.read_csv('./Activity.csv')
         df = pd.DataFrame(data)
         
         # 确保 'ActivityDate' 列是日期格式
@@ -793,33 +760,21 @@ def send_scheduled_message(user_id):
         print(f"Message sent to {user_id}")
     except Exception as e:
         print(f"發送訊息時出現錯誤: {e}")
-
 def schedule_jobs():
     file_path = "./user_ids.txt"
     if not os.path.exists(file_path):
         print("File not found!")
         return
-    
-    # Step 1: 读取文件内容并将其存储在字典中
-    user_data = {}
     with open(file_path, "r") as file:
-        lines = file.readlines()
-    
-    for line in lines:
-        user_id, gettime = line.strip().split(',')
-        # Step 2: 更新字典，以保留最新的时间
-        user_data[user_id] = gettime
-
-    # Step 3: 將更新後的資料寫回txt檔
-    with open(file_path, "w") as file:
-        for user_id, gettime in user_data.items():
-            file.write(f"{user_id},{gettime}\n")
-
-    # Step 4: 為每個不同的user_id安排定時
-    for user_id, gettime in user_data.items():
+        user_times = file.readlines()
+    for user_time in user_times:
+        user_id, gettime = user_time.strip().split(',')
+        # 清除已存在的相同時間排程
+        for job in schedule.get_jobs():
+            if job.job_func == send_scheduled_message and job.args[0] == user_id:
+                schedule.cancel_job(job)
         print(f"Scheduling message for {user_id} at {gettime}")
         schedule.every().day.at(gettime).do(send_scheduled_message, user_id=user_id)
-
 def check_for_updates():
     schedule_jobs()  # 更新排程
 #群組
@@ -914,14 +869,14 @@ def handle_postback(event):
         # 用插值法將有空缺的數據補上
         df_hr_interpolate = df_week.resample('15min').mean().interpolate()
 
-        # plt.style.use('seaborn-v0_8')
+        plt.style.use('seaborn-v0_8')
         matplotlib.rc('font', family='Microsoft JhengHei')
 
         # 創建圖表
-        fig, ax1 = plt.subplots(figsize=(10, 6))
+        fig, ax1 = plt.subplots(figsize=(10, 8))
 
         # 繪製心率折線圖
-        ax1.plot(df_hr_interpolate.index, df_hr_interpolate['量測值'], label='缺失數據推測值', linestyle='--', color = "#D9006C")
+        ax1.plot(df_hr_interpolate.index, df_hr_interpolate['量測值'], label='缺失數據推測值', linestyle='--', color='gray')
         ax1.plot(df_hr.index, df_hr['量測值'], label='平均心率', color='#1f77b4')
 
         # 標記心律不整時間點
@@ -939,10 +894,8 @@ def handle_postback(event):
         ax1.set_title(title_date)
         ax1.set_xlabel('時間')
         ax1.set_ylabel('心率')
-        # ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-        # ax1.xaxis.set_major_locator(mdates.HourLocator(interval=1))  # 每小時一個標記
-        ax1.xaxis.set_major_locator(mdates.HourLocator(interval=2))  # 每2小時顯示一次標記
-        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # 格式化為 時:分 的形式
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        ax1.xaxis.set_major_locator(mdates.HourLocator(interval=1))  # 每小時一個標記
         ax1.set_xlim([datetime.strptime(start_date, '%Y-%m-%d'), datetime.strptime(start_date, '%Y-%m-%d') + timedelta(days=1)])  # 設置x軸顯示範圍為00:00到24:00
         ax1.legend()
 
@@ -951,14 +904,14 @@ def handle_postback(event):
         if arrhythmia_alert_count_dif > 0  :
             summary_text1 = f"今日心律不整警示：{arrhythmia_alert_count}次，比昨日多{arrhythmia_alert_count_yesterday}次\n如這症狀持續許久，請尋求醫療協助。"
         summary_text2 = f"平均心率:{avgHeartrate}下"
-        summary_text3 = f"休息心率(<94bpm)比例：{restPercentage}%"
-        summary_text4 = f"輕度運動心率(94~113bpm)比例：{lowExerPercentage}%"
-        summary_text5 = f"中、重度運動心率(>114bpm)比例：{highExerPercentage}%"
+        summary_text3 = f"休息心率(<94bpm)比例:{restPercentage}%"
+        summary_text4 = f"輕度運動心率(94~113bpm)比例:{lowExerPercentage}%"
+        summary_text5 = f"中、重度運動心率(>114bpm)比例:{highExerPercentage}%"
 
-        fig.text(0.07, 0.18, summary_text1, ha='left', fontsize=12)
-        fig.text(0.47, 0.15, summary_text3, ha='left', fontsize=12)
-        fig.text(0.47, 0.1, summary_text4, ha='left', fontsize=12)
-        fig.text(0.47, 0.05, summary_text5, ha='left', fontsize=12)
+        fig.text(0.07, 0.2, summary_text1, ha='left', fontsize=12)
+        fig.text(0.47, 0.2, summary_text3, ha='left', fontsize=12)
+        fig.text(0.47, 0.15, summary_text4, ha='left', fontsize=12)
+        fig.text(0.47, 0.1, summary_text5, ha='left', fontsize=12)
 
         # 添加心率區間線條
         left, bottom, width, height = 0.04, 0, 0.4, 0.15
@@ -1011,7 +964,7 @@ def handle_postback(event):
         plt.savefig('report.png')
         im = pyimgur.Imgur(CLIENT_ID)
         PATH = 'report.png'
-        uploaded_image = im.upload_image(PATH)
+        uploaded_image = im.upload_image(PATH, title='Heart Rate Report')
         #儲存imgur連結
         heartratedayimgurl = uploaded_image.link
     
@@ -1051,28 +1004,28 @@ def handle_postback(event):
         lowExerPercentage = round((lowExer / total_count) * 100, 1)
         highExerPercentage = round((highExer / total_count) * 100, 1)
 
-        # plt.style.use('seaborn-v0_8')
+        plt.style.use('seaborn-v0_8')
         matplotlib.rc('font', family='Microsoft JhengHei')
-        fig, ax1 = plt.subplots(figsize=(10, 6))
-        ax1.plot(df_hr_interpolate.index,df_hr_interpolate['量測值'],label='缺失數據推測值', linestyle='--', color = "#D9006C")
-        ax1.plot(df_hr.index,df_hr['量測值'], label='平均心率(小時)')
-        ax1.set_title('心率周報表')
+        fig, ax1 = plt.subplots(figsize=(10, 8))
+        ax1.plot(df_hr_interpolate.index,df_hr_interpolate['量測值'],label='缺失數據推測值', linestyle='--', color = "red")
+        ax1.plot(df_hr.index,df_hr['量測值'], label='平均心率(小時)', color = "#1f77b4")
+        ax1.set_title('上週平均心率')
         ax1.set_xlabel('日期時間')
         ax1.set_ylabel('心率')
         ax1.legend()
 
         # 在圖表上添加文本
         summary_text1 = "本周心律不整警示：3次"
-        summary_text2 = f"平均心率：{avgHeartrate}下"
-        summary_text3 = f"休息心率(<94bpm)比例：{restPercentage}%"
-        summary_text4 = f"輕度運動心率(94~113bpm)比例：{lowExerPercentage}%"
-        summary_text5 = f"中、重度運動心率(>114bpm)比例：{highExerPercentage}%"
+        summary_text2 = f"平均心率:{avgHeartrate}下"
+        summary_text3 = f"休息心率(<94bpm)比例:{restPercentage}%"
+        summary_text4 = f"輕度運動心率(94~113bpm)比例:{lowExerPercentage}%"
+        summary_text5 = f"中、重度運動心率(>114bpm)比例:{highExerPercentage}%"
 
-        fig.text(0.07, 0.18, summary_text1, ha='left', fontsize=12)
+        fig.text(0.07, 0.2, summary_text1, ha='left', fontsize=12)
         #fig.text(0.07, 0.15, summary_text2, ha='left', fontsize=12)
-        fig.text(0.47, 0.15, summary_text3, ha='left', fontsize=12)
-        fig.text(0.47, 0.1, summary_text4, ha='left', fontsize=12)
-        fig.text(0.47, 0.05, summary_text5, ha='left', fontsize=12)
+        fig.text(0.47, 0.2, summary_text3, ha='left', fontsize=12)
+        fig.text(0.47, 0.15, summary_text4, ha='left', fontsize=12)
+        fig.text(0.47, 0.1, summary_text5, ha='left', fontsize=12)
         # 添加心率區間線條
         left, bottom, width, height = 0.04, 0, 0.4, 0.15
         ax2 = fig.add_axes([left, bottom, width, height])
@@ -1117,7 +1070,7 @@ def handle_postback(event):
         handles = [mpatches.Patch(color=color, label=label) for label, color in zip(['休息', '輕度運動', '中、重度運動'], pie_colors)]
         fig.legend(handles= handles, loc='lower right',frameon = True, bbox_to_anchor=(1, 0), edgecolor='gray', facecolor='white', framealpha=1)
 
-        #plt.grid(True)
+        plt.grid(True)
 
         plt.tight_layout()
         plt.subplots_adjust(bottom=0.3)
@@ -1138,12 +1091,10 @@ def handle_postback(event):
     def funactivityday(start_date):
         data = pd.read_csv('./dailyActivity.csv')
         df = pd.DataFrame(data)
-        print(df)
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
         df.set_index('ActivityDate', inplace = True)
+        # specific_time = '2024-05-27'
         df_yesterday = df.loc[start_date]
-
-        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=12)
 
         #抓久坐警示csv
         datawarning = pd.read_csv('./warning.csv')
@@ -1152,65 +1103,46 @@ def handle_postback(event):
         
         df2.set_index('ActivityDate', inplace = True)
         df2_yesterday = df2.loc[start_date]
-        print(df2_yesterday)
-        print(type(df2_yesterday))
-        print(df2_yesterday.head())
-        df2_yesterday.set_index('ActivityDate', inplace = True)
         StandUpAlert = df2_yesterday['StandUpAlert']
-        print(StandUpAlert)
 
         #將數據間隔整理為固定1小時                
         df_hourly = df_yesterday.resample('h').sum()
-        df_yesterday_hourly = df_yesterday.resample('h').sum()
-
+        matplotlib.rc('font', family='Microsoft JhengHei')
         plt.figure(figsize=(10, 6))
-        bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03, color='#60b8b3')
-        print(df_hourly['Step'])
+        bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03,align='center')
 
-        plt.xlabel('時間', fontproperties=font_prop)
-        plt.ylabel('步數', fontproperties=font_prop)
+        plt.xlabel('時間')  ###
+        plt.ylabel('步數')  ###
 
         #顯示總和步數
         total_steps = df_hourly['Step'].sum()
-        total_steps_yesterday = df_yesterday_hourly['Step'].sum()
-        steps_difference = total_steps - total_steps_yesterday
+        plt.title(f'昨日活動 (總步數: {total_steps:.0f})')  ###
 
-
-        # Extract month and day for the title
-        month = datetime.strptime(start_date, '%Y-%m-%d').month
-        day = datetime.strptime(start_date, '%Y-%m-%d').day
-        title_date = f'{month}月{day}日 活動'
-        plt.title(title_date, fontproperties=font_prop)
-
-        # 自訂標籤：只顯示偶數小時的標籤
-        plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=2))
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # 格式化為 時:分 的形式
+        # 設置x軸刻度和標籤
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+        plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=1))
+        hours = df_hourly.index
+        plt.gca().set_xticks(hours)
+        plt.gca().set_xticklabels([hour.strftime("%H:%M") for hour in hours])
 
         for bar in bars:
             height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10, fontproperties=font_prop)
+            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10)
             
         plt.tight_layout() 
-
-        summary_text1 = f'昨日久坐提醒: {StandUpAlert} 次'
-
-        if steps_difference > 0:
-            summary_text2 = f'總步數: {total_steps:.0f}步，比前一天多了 {steps_difference} 步。'
+        #圖表底下的講解
+        summary_text1 = f'今日久坐提醒:{StandUpAlert}次'
+        if(total_steps >= 8000):
+            summary_text2 = '恭喜你！你已經達成了今日8000步的目標。繼續保持這種健康的生活方式，你的身體會感謝你的！'
         else:
-            summary_text2 = f'總步數: {total_steps:.0f}步，比前一天少了 {-steps_difference} 步。'
+            summary_text2 = f'還差{8000-total_steps}步就能達成目標8000步，繼續加油！'
 
-        if total_steps >= 8000 and StandUpAlert == 0:
-            summary_text3 = '恭喜你！你已經達成了8000步的目標。繼續保持這種健康的生活方式，你的身體會感謝你的！'
-        elif total_steps >= 8000 and StandUpAlert > 0: 
-            summary_text3 = '恭喜你！你已經達成了8000步的目標。'
-        else:
-            summary_text3 = f'還差 {8000 - total_steps} 步就能達成目標8000步，繼續加油！'
-        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.05, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)
+        # 使用指定字體顯示文字
+        plt.figtext(0.07, 0.15, summary_text1 , ha='left', fontsize=12)     ###
+        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12)   ###
         plt.subplots_adjust(bottom=0.3)
 
-        plt.savefig('report2.png')
+        plt.savefig('report2.png', bbox_inches='tight')
         PATH = 'report2.png'
 
         im = pyimgur.Imgur(CLIENT_ID)
@@ -1222,6 +1154,7 @@ def handle_postback(event):
         preview_image_url=activitydayimgurl
         )
         return activityday_image_message
+
     #周活動
     def funactivityweek(start_date):
 
@@ -1231,6 +1164,7 @@ def handle_postback(event):
         df['ActivityDate'] = pd.to_datetime(df['ActivityDate'])
         df.set_index('ActivityDate', inplace=True)
 
+        # start_date = '2024-05-28'
         end_date = (datetime.strptime(start_date, '%Y-%m-%d') + timedelta(days=6)).strftime('%Y-%m-%d')
         df_week = df.loc[start_date:end_date]
 
@@ -1249,9 +1183,9 @@ def handle_postback(event):
 
         matplotlib.rc('font', family='Microsoft JhengHei')
         plt.figure(figsize=(10, 6))
-        bars = plt.bar(df_daliy.index, df_daliy['Step'], width=0.8, align='center', color='#60b8b3')
+        bars = plt.bar(df_daliy.index, df_daliy['Step'], width=0.8, align='center')
 
-        plt.title('活動周報表')
+        plt.title('上週活動量')
         plt.xlabel('日期')
         plt.ylabel('步數')
 
@@ -1277,7 +1211,7 @@ def handle_postback(event):
         plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12)
         plt.tight_layout()
         plt.subplots_adjust(bottom=0.3)
-        # plt.grid(True)
+        plt.grid(True)
         # plt.legend()
         plt.savefig('reportActivityweek.png')
 
@@ -1389,7 +1323,7 @@ def handle_postback(event):
             plt.subplots_adjust(bottom=0.4)
             plt.legend(handles=patches, loc='upper right', bbox_to_anchor=(1.0, 1.3), fontsize=8)
                 
-            plt.savefig("colored_table.png", dpi=200, bbox_inches='tight')
+            plt.savefig("colored_table.png", bbox_inches='tight')
             im = pyimgur.Imgur(CLIENT_ID)
             PATH = 'colored_table.png'
             uploaded_image=im.upload_image(PATH) #定義upload_image
@@ -1438,7 +1372,7 @@ def handle_postback(event):
         x = np.arange(len(sampled_max_df.index))
         width = 0.3
 
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(10, 5))
         colors = [plt.cm.Reds(i / 5) for i in range(5)]
         plt.bar(x, partitions[:, 0], width, label='精神飽滿', color=colors[0])
         plt.bar(x, partitions[:, 1], width, bottom=partitions[:, 0], label='精神不錯', color=colors[1])
@@ -1455,11 +1389,11 @@ def handle_postback(event):
 
         plt.xlabel('日期')
         plt.ylabel('疲勞指數')
-        plt.title('疲勞周報表')
+        plt.title('上週疲勞指數')
         plt.xticks(x, sampled_max_df.index.strftime('%Y-%m-%d'))
 
         plt.legend()
-        plt.grid(axis='y')
+        plt.grid(True)
         plt.savefig("colored_tableweek.png", bbox_inches='tight')
         # plt.savefig("colored_table.png")
         im = pyimgur.Imgur(CLIENT_ID)
@@ -1588,9 +1522,9 @@ def handle_postback(event):
 
         # 設置顏色映射
         color_map = {
-            '淺眠': '#60b8b3',  # 淺綠色
-            '深眠': '#437e7b',  # 深綠色
-            '醒': '#FF8040'    # 橘色
+            '淺眠': '#cadff0',  # 淺藍色
+            '深眠': '#2050bc',  # 深藍色
+            '醒': '#fd7706'    # 橘色
         }
         colors = [color_map[state] for state in states]
 
@@ -1687,7 +1621,7 @@ def handle_postback(event):
 
         # 圖表底下的講解
         # summary_text1 = '昨日睡眠時長:X小時X分、淺眠時長:X小時X分、深眠時長:X小時X分、轉醒次數:X次'
-        summary_text1 = f'總睡眠時長：{total_sleep_duartion//60}小時{total_sleep_duartion%60}分'
+        summary_text1 = f'總睡眠時長:{total_sleep_duartion//60}小時{total_sleep_duartion%60}分'
         if(total_sleep_duration_gap > 60):
             summary_text1 += f'，比昨日多睡了{total_sleep_duration_gap//60}小時{total_sleep_duration_gap%60}分'
         elif(total_sleep_duration_gap > 0):
@@ -1697,16 +1631,16 @@ def handle_postback(event):
         elif(total_sleep_duration_gap < 0):
             summary_text1 += f'，比昨日少睡了{-total_sleep_duration_gap%60}分'
 
-        summary_text2 = f'淺眠時長：{shallow_sleep_duration//60}小時{shallow_sleep_duration%60}分'
+        summary_text2 = f'淺眠時長:{shallow_sleep_duration//60}小時{shallow_sleep_duration%60}分'
         if(deep_sleep_duration//60 == 0):
-            summary_text3 = f'深眠時長：{deep_sleep_duration%60}分'
+            summary_text3 = f'深眠時長:{deep_sleep_duration%60}分'
         else:
-            summary_text3 = f'深眠時長：{deep_sleep_duration//60}小時{deep_sleep_duration%60}分'
+            summary_text3 = f'深眠時長:{deep_sleep_duration//60}小時{deep_sleep_duration%60}分'
 
         if(awake_duration//60 == 0):
-            summary_text4 = f'轉醒時長：{awake_duration%60}分'
+            summary_text4 = f'轉醒時長:{awake_duration%60}分'
         else:
-            summary_text4 = f'轉醒時長：{awake_duration // 60}小時{awake_duration % 60}分'    
+            summary_text4 = f'轉醒時長:{awake_duration // 60}小時{awake_duration % 60}分'    
 
         if(wake_count > 0):
             summary_text5 = f'轉醒次數：{wake_count}次'
@@ -1720,22 +1654,20 @@ def handle_postback(event):
         legend_labels = ['淺眠', '深眠', '醒']
         legend_colors = [color_map[label] for label in legend_labels]
         legend_patches = [plt.Rectangle((0, 0), 1, 1, facecolor=color) for color in legend_colors]
-        #plt.legend(legend_patches, legend_labels, loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.legend(legend_patches, legend_labels)
+        plt.legend(legend_patches, legend_labels, loc='center left', bbox_to_anchor=(1, 0.5))
 
         # 在右下角添加圓餅圖
         pie_ax = fig.add_axes([0.5, 0.05, 0.4, 0.4])  # [left, bottom, width, height]
         labels = ['淺眠', '深眠', '醒']
         sizes = [shallow_sleep_duration, deep_sleep_duration, awake_duration]
-        colors = ['#60b8b3', '#437e7b', '#FF8040']
+        colors = ['#cadff0', '#2050bc', '#fd7706']
         pie_ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
-        # pie_ax.set_title('睡眠狀態')
+        pie_ax.set_title('睡眠狀態')
 
         # 顯示圖表
         # plt.xticks(rotation=45)
         plt.tight_layout()
-        plt.subplots_adjust(top=0.94, bottom=0.64)
-        # plt.subplots_adjust(bottom=0.7)
+        plt.subplots_adjust(bottom=0.7)
         plt.savefig('reportSleep.png')
         PATH = 'reportSleep.png'
 
@@ -1817,13 +1749,13 @@ def handle_postback(event):
         unique_dates = df_sleep['Date'].dt.strftime('%Y-%m-%d').unique()[::-1]
 
 
-        # print(df_sleep)
+        print(df_sleep)
 
         # 創建圖表
 
         color_map = {
-            '淺眠': '#60b8b3',  # 淺綠色
-            '深眠': '#437e7b',  # 深綠色
+            '淺眠': '#cadff0',  # 淺藍色
+            '深眠': '#2050bc',  # 深藍色
         ##    '醒': '#fd7706'    # 橘色
         }
 
@@ -1889,7 +1821,7 @@ def handle_postback(event):
         sleep_duration_gap = total_sleep_duration - yesterday_total_sleep_duration
 
         # 圖表底下的講解
-        summary_text1 = f'本週平均睡眠時長：{total_sleep_duration//60}小時{total_sleep_duration%60}分'
+        summary_text1 = f'本週平均睡眠時長:{total_sleep_duration//60}小時{total_sleep_duration%60}分'
         if(sleep_duration_gap > 60):
             summary_text1 += f'，比上週多睡了{sleep_duration_gap//60}小時{sleep_duration_gap%60}分'
         elif(sleep_duration_gap > 0):
@@ -1898,11 +1830,11 @@ def handle_postback(event):
             summary_text1 += f'，比上週少睡了{-sleep_duration_gap//60}小時{-sleep_duration_gap%60}分'
         elif(sleep_duration_gap < 0):
             summary_text1 += f'，比上週少睡了{-sleep_duration_gap%60}分'
-        summary_text2 = f'平均淺眠時長：{shallow_sleep_duration//60}小時{shallow_sleep_duration%60}分'
+        summary_text2 = f'平均淺眠時長:{shallow_sleep_duration//60}小時{shallow_sleep_duration%60}分'
         if(deep_sleep_duration//60 == 0):
-            summary_text3 = f'平均深眠時長：{deep_sleep_duration%60}分'
+            summary_text3 = f'平均深眠時長:{deep_sleep_duration%60}分'
         else:
-            summary_text3 = f'平均深眠時長：{deep_sleep_duration//60}小時{deep_sleep_duration%60}分'
+            summary_text3 = f'平均深眠時長:{deep_sleep_duration//60}小時{deep_sleep_duration%60}分'
         if(shallow_sleep_duration + deep_sleep_duration >= 420):
             summary_text5 = '已睡足平均所需之7小時！'
         else:
@@ -1931,13 +1863,14 @@ def handle_postback(event):
         #sizes = [shallow_sleep_duration, deep_sleep_duration, awake_duration]
         sizes = [shallow_sleep_duration, deep_sleep_duration]
         #colors = ['#cadff0', '#2050bc', '#fd7706']
-        # colors = ['#cadff0', '#2050bc']
-        colors = ['#60b8b3', '#437e7b']
+        colors = ['#cadff0', '#2050bc']
         pie_ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
-        # pie_ax.set_title('睡眠狀態', y=-0.1)
+        pie_ax.set_title('睡眠狀態', y=-0.1)
 
 
-        plt.tight_layout()
+        # 旋轉日期標籤以提高可讀性
+        # plt.xticks(rotation=45)
+        # plt.tight_layout()
         plt.subplots_adjust(bottom=0.5)
         plt.savefig('Sleepweekreport.png')
         PATH = 'Sleepweekreport.png'
@@ -1957,7 +1890,7 @@ def handle_postback(event):
     params = event.postback.params
     if params and 'date' in params:
         selected_date = params['date']
-        report_type = data.split('&')[0].split('=')[1]  # 提取报告類型
+        report_type = data.split('&')[0].split('=')[1]  # 提取报告类型
         try:
             # 将选择的日期转换为 YYYY-MM-DD 格式
             start_date = datetime.strptime(selected_date, '%Y-%m-%d').strftime('%Y-%m-%d')
@@ -1968,78 +1901,29 @@ def handle_postback(event):
             # )
             #根據不同類型傳報表
             if report_type == "heartrateday":
-                try:
-                    report_image_message =funheartrateday(start_date)
-                    line_bot_api.reply_message(event.reply_token, report_image_message)
-                except KeyError:
-                # 找不到對應的日期，回應用戶
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,heartrateday。")
-                    )
+                report_image_message =funheartrateday(start_date)
+                line_bot_api.reply_message(event.reply_token, report_image_message)
             elif report_type =="heartrateweek":
-                try:
-                    report_image_message =funheartrateweek(start_date)  
-                    line_bot_api.reply_message(event.reply_token, report_image_message) 
-                except KeyError:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,heartrateweek。")
-                    )
+                report_image_message =funheartrateweek(start_date)  
+                line_bot_api.reply_message(event.reply_token, report_image_message) 
             elif report_type =="sleepday":
-                try:
-                    report_image_message =funsleepday(start_date)  
-                    line_bot_api.reply_message(event.reply_token, report_image_message)
-                except KeyError:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,sleepday。")
-                    )
+                report_image_message =funsleepday(start_date)  
+                line_bot_api.reply_message(event.reply_token, report_image_message)
             elif report_type =="sleepweek":
-                try:
-                    report_image_message =funsleepweek(start_date) 
-                    line_bot_api.reply_message(event.reply_token, report_image_message)
-                except KeyError:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,sleepweek。")
-                    )
+                report_image_message =funsleepweek(start_date) 
+                line_bot_api.reply_message(event.reply_token, report_image_message)
             elif report_type =="activityday":
-                try:
-                    report_image_message =funactivityday(start_date)  
-                    line_bot_api.reply_message(event.reply_token, report_image_message)
-                except KeyError:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,activityday。")
-                    )
+                report_image_message =funactivityday(start_date)  
+                line_bot_api.reply_message(event.reply_token, report_image_message)
             elif report_type =="activityweek":
-                try:
-                    report_image_message =funactivityweek(start_date) 
-                    line_bot_api.reply_message(event.reply_token, report_image_message)  
-                except KeyError:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,activityweek。")
-                    ) 
+                report_image_message =funactivityweek(start_date) 
+                line_bot_api.reply_message(event.reply_token, report_image_message)   
             elif report_type =="fatigueday":
-                try:
-                    report_image_message =funfatigueday(start_date) 
-                    line_bot_api.reply_message(event.reply_token, report_image_message) 
-                except KeyError:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,fatigueday。")
-                    )
+                report_image_message =funfatigueday(start_date) 
+                line_bot_api.reply_message(event.reply_token, report_image_message) 
             elif report_type =="fatigueweek":
-                try:
-                    report_image_message =funfatigueweek(start_date) 
-                    line_bot_api.reply_message(event.reply_token, report_image_message)
-                except KeyError:
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text=f"抱歉，{start_date} 沒有數據,fatigueweek。")
-                    )
+                report_image_message =funfatigueweek(start_date) 
+                line_bot_api.reply_message(event.reply_token, report_image_message)
             elif report_type =="allreportday":
                 report_image_message1 =funfatigueday(start_date)     
                 report_image_message2 =funsleepday(start_date)     
@@ -2059,308 +1943,6 @@ def handle_postback(event):
                 event.reply_token,
                 TextSendMessage(text=f"日期格式錯誤: {e}")
             )
-def load_qa_data(): #把QA CSV用成DICT
-    data = pd.read_csv('./q_a.csv', encoding='big5')
-    qa_dict = {row['Question']: row['Answer'] for index, row in data.iterrows()}
-    return qa_dict
-qa_dict = load_qa_data()  
-
-def flex_hr_qa(event):
-    data = pd.read_csv('./q_a.csv', encoding='big5')
-    df = pd.DataFrame(data)
-    df_heartrate = df[df["Type"] == "心率"]
-    carousel_contents = []
-
-    count = 0
-    while count < len(df_heartrate):
-        bubble_contents = []
-        for _ in range(3):  # 每個 bubble 最多有 3 個按鈕
-            if count < len(df_heartrate):
-                bubble_contents.append({
-                    "type": "button",
-                    "action": {
-                        "type": "message",
-                        "label": df_heartrate["Question"].iloc[count],
-                        "text": df_heartrate["Question"].iloc[count]
-                    }
-                })
-                count += 1
-            else:
-                break
-        while len(bubble_contents) < 3:
-            bubble_contents.append( {
-                "type": "button",
-                "action": {
-                "type": "message",
-                "label": " ",
-                "text": " "
-                }
-                },
-            )
-
-        bubble = {
-            "type": "bubble",
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": "常見問題",
-                        "size": "xl",
-                        "weight": "bold"
-                    },
-                    {
-                        "type": "text",
-                        "text": "心率",
-                        "size": "md",
-                        "color": "#9C9C9C"
-                    }
-                ]
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": bubble_contents
-            },
-            "styles": {
-                "footer": {
-                    "separator": True
-                }
-            }
-        }
-        carousel_contents.append(bubble)
-
-    flex_message = FlexSendMessage(
-        alt_text='hello',
-        contents={
-            "type": "carousel",
-            "contents": carousel_contents
-        }
-    )
-    line_bot_api.reply_message(event.reply_token, flex_message)
-
-def flex_sleep_qa(event): 
-    data = pd.read_csv('./q_a.csv', encoding='big5')
-    df = pd.DataFrame(data)
-    df_sleep = df[df["Type"] == "睡眠"]
-    carousel_contents = []
-
-    count = 0
-    while count < len(df_sleep):
-        bubble_contents = []
-        for _ in range(3):  # 每個 bubble 最多有 3 個按鈕
-            if count < len(df_sleep):
-                bubble_contents.append({
-                    "type": "button",
-                    "action": {
-                        "type": "message",
-                        "label": df_sleep["Question"].iloc[count],
-                        "text": df_sleep["Question"].iloc[count]
-                    }
-                })
-                count += 1
-            else:
-                break
-        while len(bubble_contents) < 3:
-            bubble_contents.append( {
-                "type": "button",
-                "action": {
-                "type": "message",
-                "label": " ",
-                "text": " "
-                }
-                },
-            )
-        bubble = {
-            "type": "bubble",
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": "常見問題",
-                        "size": "xl",
-                        "weight": "bold"
-                    },
-                    {
-                        "type": "text",
-                        "text": "睡眠",
-                        "size": "md",
-                        "color": "#9C9C9C"
-                    }
-                ]
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": bubble_contents
-            },
-            "styles": {
-                "footer": {
-                    "separator": True
-                }
-            }
-        }
-        carousel_contents.append(bubble)
-
-    flex_message = FlexSendMessage(
-        alt_text='hello',
-        contents={
-            "type": "carousel",
-            "contents": carousel_contents
-        }
-    )
-    line_bot_api.reply_message(event.reply_token, flex_message)
-
-def flex_activity_qa(event):
-    data = pd.read_csv('./q_a.csv', encoding='big5')
-    df = pd.DataFrame(data)
-    df_activity = df[df["Type"] == "活動"]
-    carousel_contents = []
-
-    count = 0
-    while count < len(df_activity):
-        bubble_contents = []
-        for _ in range(3):  # 每個 bubble 最多有 3 個按鈕
-            if count < len(df_activity):
-                bubble_contents.append({
-                    "type": "button",
-                    "action": {
-                        "type": "message",
-                        "label": df_activity["Question"].iloc[count],
-                        "text": df_activity["Question"].iloc[count]
-                    }
-                })
-                count += 1
-            else:
-                break
-        while len(bubble_contents) < 3:
-            bubble_contents.append( {
-                "type": "button",
-                "action": {
-                "type": "message",
-                "label": " ",
-                "text": " "
-                }
-                },
-            )
-        bubble = {
-            "type": "bubble",
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": "常見問題",
-                        "size": "xl",
-                        "weight": "bold"
-                    },
-                    {
-                        "type": "text",
-                        "text": "活動",
-                        "size": "md",
-                        "color": "#9C9C9C"
-                    }
-                ]
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": bubble_contents
-            },
-            "styles": {
-                "footer": {
-                    "separator": True
-                }
-            }
-        }
-        carousel_contents.append(bubble)
-
-    flex_message = FlexSendMessage(
-        alt_text='hello',
-        contents={
-            "type": "carousel",
-            "contents": carousel_contents
-        }
-    )
-    line_bot_api.reply_message(event.reply_token, flex_message)
-
-def flex_fatigue_qa(event):
-    data = pd.read_csv('./q_a.csv', encoding='big5')
-    df = pd.DataFrame(data)
-    df_fatigue = df[df["Type"] == "疲勞"]
-    carousel_contents = []
-
-    count = 0
-    while count < len(df_fatigue):
-        bubble_contents = []
-        for _ in range(3):  # 每個 bubble 最多有 3 個按鈕
-            if count < len(df_fatigue):
-                bubble_contents.append({
-                    "type": "button",
-                    "action": {
-                        "type": "message",
-                        "label": df_fatigue["Question"].iloc[count],
-                        "text": df_fatigue["Question"].iloc[count]
-                    }
-                })
-                count += 1
-            else:
-                break
-        while len(bubble_contents) < 3:
-            bubble_contents.append( {
-                "type": "button",
-                "action": {
-                "type": "message",
-                "label": " ",
-                "text": " "
-                }
-                },
-            )
-        bubble = {
-            "type": "bubble",
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": "常見問題",
-                        "size": "xl",
-                        "weight": "bold"
-                    },
-                    {
-                        "type": "text",
-                        "text": "疲勞",
-                        "size": "md",
-                        "color": "#9C9C9C"
-                    }
-                ]
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": bubble_contents
-            },
-            "styles": {
-                "footer": {
-                    "separator": True
-                }
-            }
-        }
-        carousel_contents.append(bubble)
-
-    flex_message = FlexSendMessage(
-        alt_text='hello',
-        contents={
-            "type": "carousel",
-            "contents": carousel_contents
-        }
-    )
-    line_bot_api.reply_message(event.reply_token, flex_message)
 
 if __name__ == "__main__":
     schedule_jobs()
@@ -2375,4 +1957,5 @@ if __name__ == "__main__":
     schedule_thread.start()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
 
