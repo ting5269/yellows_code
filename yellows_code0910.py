@@ -1153,6 +1153,8 @@ def handle_postback(event):
         df2.set_index('ActivityDate', inplace = True)
         df2_yesterday = df2.loc[start_date]
         print(df2_yesterday)
+        print(type(df2_yesterday))
+        print(df2_yesterday.head())
         df2_yesterday.set_index('ActivityDate', inplace = True)
         StandUpAlert = df2_yesterday['StandUpAlert']
         print(StandUpAlert)
