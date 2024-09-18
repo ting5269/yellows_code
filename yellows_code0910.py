@@ -34,7 +34,7 @@ gettime = "08:00" #先定義一個初始值
 
 app = Flask(__name__)
 
-line_bot_api = LineBotApi("+vszRtjsTxuPM6653PLxHCoGzgbRMKVkTOd8XwdbIlpQ1cqv8LQ3z2F5C2Zdi2hMvWomMnloLp8/40rNFdCQkm4f6v1kte5s1+76wS+9kQ+M1rtvBVjujh12WpDB1Qc9Z/2NpB+NX5D3THH76HDAYwdB04t89/1O/w1cDnyilFU=")
+line_bot_api = LineBotApi("rA4c99ztAvij6tW6HId9zkoMHnyHmSi0E5+fI9zpKBVCmPSzJQMKoYxEwDocI03OvWomMnloLp8/40rNFdCQkm4f6v1kte5s1+76wS+9kQ/4vzey+VrrJk2wzErS2bl61CjdiqWQpss4rDqJbgrOyQdB04t89/1O/w1cDnyilFU=")
 handler = WebhookHandler("9a31037c985e085e319ec091700885c8")
 
 @ app.route("/callback", methods=['POST'])
@@ -179,7 +179,7 @@ def handle_message(event):
                 event.reply_token,
                 TextSendMessage(text="只有病患可以查看自己的報告。")
             )
-    ###先註解掉不然會跟其他指令發生衝突
+    ##先註解掉不然會跟其他指令發生衝突
     # else:
     #     # 未知指令的處理
     #     line_bot_api.reply_message(
@@ -875,7 +875,7 @@ def handle_postback(event):
         # start_date = '2024-05-22'
         yesterday = (datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
 
-        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=12)
+        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=12)###
 
 
         df['時間'] = pd.to_datetime(df['時間'])
@@ -939,15 +939,15 @@ def handle_postback(event):
         title_date = f'{month}月{day}日 心率'
 
 
-        ax1.set_title(title_date, fontproperties=font_prop)
-        ax1.set_xlabel('時間', fontproperties=font_prop)
-        ax1.set_ylabel('心率', fontproperties=font_prop)
+        ax1.set_title(title_date, fontproperties=font_prop)###
+        ax1.set_xlabel('時間', fontproperties=font_prop)###
+        ax1.set_ylabel('心率', fontproperties=font_prop)###
         # ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
         # ax1.xaxis.set_major_locator(mdates.HourLocator(interval=1))  # 每小時一個標記
         ax1.xaxis.set_major_locator(mdates.HourLocator(interval=2))  # 每2小時顯示一次標記
         ax1.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))  # 格式化為 時:分 的形式
         ax1.set_xlim([datetime.strptime(start_date, '%Y-%m-%d'), datetime.strptime(start_date, '%Y-%m-%d') + timedelta(days=1)])  # 設置x軸顯示範圍為00:00到24:00
-        ax1.legend(prop=font_prop)
+        ax1.legend(prop=font_prop)###
 
         # 在圖表上添加文本
         summary_text1 = f"今日心律不整警示：{arrhythmia_alert_count}次"
@@ -958,10 +958,10 @@ def handle_postback(event):
         summary_text4 = f"輕度運動心率(94~113bpm)比例：{lowExerPercentage}%"
         summary_text5 = f"中、重度運動心率(>114bpm)比例：{highExerPercentage}%"
 
-        fig.text(0.07, 0.18, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)
-        fig.text(0.47, 0.15, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)
-        fig.text(0.47, 0.1, summary_text4, ha='left', fontsize=12, fontproperties=font_prop)
-        fig.text(0.47, 0.05, summary_text5, ha='left', fontsize=12, fontproperties=font_prop)
+        fig.text(0.07, 0.18, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)###
+        fig.text(0.47, 0.15, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)###
+        fig.text(0.47, 0.1, summary_text4, ha='left', fontsize=12, fontproperties=font_prop)###
+        fig.text(0.47, 0.05, summary_text5, ha='left', fontsize=12, fontproperties=font_prop)###
 
         # 添加心率區間線條
         left, bottom, width, height = 0.04, 0, 0.4, 0.15
@@ -973,9 +973,9 @@ def handle_postback(event):
         ax2.plot([2, 3], [0, 0], color='lightcoral', linewidth=15)
 
         # 顯示心率區間標記
-        ax2.text(0.5, 0.02, '偏慢', horizontalalignment='center', fontsize=12, color='blue', fontproperties=font_prop)
-        ax2.text(1.5, 0.02, '心率正常', horizontalalignment='center', fontsize=12, color='green', fontproperties=font_prop)
-        ax2.text(2.5, 0.02, '偏快', horizontalalignment='center', fontsize=12, color='red', fontproperties=font_prop)
+        ax2.text(0.5, 0.02, '偏慢', horizontalalignment='center', fontsize=12, color='blue', fontproperties=font_prop)###
+        ax2.text(1.5, 0.02, '心率正常', horizontalalignment='center', fontsize=12, color='green', fontproperties=font_prop)###
+        ax2.text(2.5, 0.02, '偏快', horizontalalignment='center', fontsize=12, color='red', fontproperties=font_prop)###
 
         # 計算 avgHeartrate 在哪段線上的位置
         if avgHeartrate <= 60:
@@ -990,7 +990,7 @@ def handle_postback(event):
 
         # 標記 avgHeartrate 的位置
         ax2.plot(avg_x, 0, marker='o', markersize=10, color=color)
-        ax2.text(avg_x, 0.05, summary_text2, horizontalalignment='center', fontsize=12, color=color, fontproperties=font_prop)
+        ax2.text(avg_x, 0.05, summary_text2, horizontalalignment='center', fontsize=12, color=color, fontproperties=font_prop)###
 
         # 隱藏坐標軸
         ax2.axis('off')
@@ -1005,7 +1005,7 @@ def handle_postback(event):
         pie_ax.pie([restPercentage, lowExerPercentage, highExerPercentage], colors = pie_colors, autopct=autopct_format, startangle=180 )
 
         handles = [mpatches.Patch(color=color, label=label) for label, color in zip(['休息', '輕度運動', '中、重度運動'], pie_colors)]
-        fig.legend(handles= handles, loc='lower right',frameon = True, bbox_to_anchor=(1, 0), edgecolor='gray', facecolor='white', framealpha=1,prop=font_prop)
+        fig.legend(handles= handles, loc='lower right',frameon = True, bbox_to_anchor=(1, 0), edgecolor='gray', facecolor='white', framealpha=1,prop=font_prop)###
 
         plt.tight_layout()
         plt.subplots_adjust(bottom=0.3)
@@ -1074,7 +1074,7 @@ def handle_postback(event):
         summary_text5 = f"中、重度運動心率(>114bpm)比例：{highExerPercentage}%"
 
         fig.text(0.07, 0.18, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)
-        #fig.text(0.07, 0.15, summary_text2, ha='left', fontsize=12, fontproperties=font_prop)
+        #fig.text(0.07, 0.15, summary_text2, ha='left', fontsize=12)
         fig.text(0.47, 0.15, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)
         fig.text(0.47, 0.1, summary_text4, ha='left', fontsize=12, fontproperties=font_prop)
         fig.text(0.47, 0.05, summary_text5, ha='left', fontsize=12, fontproperties=font_prop)
@@ -1149,7 +1149,7 @@ def handle_postback(event):
         # specific_time = '2024-05-27'
         df_yesterday = df.loc[start_date]
 
-        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=12)
+        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=12)###
 
         #抓久坐警示csv
         datawarning = pd.read_csv('./warning.csv')
@@ -1172,8 +1172,8 @@ def handle_postback(event):
         bars = plt.bar(df_hourly.index,df_hourly['Step'],width=0.03, color='#60b8b3')
         #print(df_hourly['Step'])
 
-        plt.xlabel('時間', fontproperties=font_prop)
-        plt.ylabel('步數', fontproperties=font_prop)
+        plt.xlabel('時間', fontproperties=font_prop)###
+        plt.ylabel('步數', fontproperties=font_prop)###
 
         #顯示總和步數
         total_steps = df_hourly['Step'].sum()
@@ -1187,7 +1187,7 @@ def handle_postback(event):
         title_date = f'{month}月{day}日 活動'
         # plt.title(f'昨日活動 (總步數: {total_steps:.0f})')
         # Set the title
-        plt.title(title_date, fontproperties=font_prop)
+        plt.title(title_date, fontproperties=font_prop)###
 
         # 自訂標籤：只顯示偶數小時的標籤
         plt.gca().xaxis.set_major_locator(mdates.HourLocator(interval=2))
@@ -1195,7 +1195,7 @@ def handle_postback(event):
 
         for bar in bars:
             height = bar.get_height()
-            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10, fontproperties=font_prop)
+            plt.text(bar.get_x() + bar.get_width() / 2, height, f'{height:.0f}', ha='center', va='bottom', fontsize=10, fontproperties=font_prop)###
             
         plt.tight_layout() 
 
@@ -1212,9 +1212,9 @@ def handle_postback(event):
             summary_text3 = '恭喜你！你已經達成了8000步的目標。'
         else:
             summary_text3 = f'還差 {8000 - total_steps} 步就能達成目標8000步，繼續加油！'
-        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.05, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)
+        plt.figtext(0.07, 0.15, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)###
+        plt.figtext(0.07, 0.1, summary_text2, ha='left', fontsize=12, fontproperties=font_prop)###
+        plt.figtext(0.07, 0.05, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)###
         plt.subplots_adjust(bottom=0.3)
 
         # output_path_activt_day="C:/Users/user/Desktop/image/report2.png"
@@ -1258,7 +1258,7 @@ def handle_postback(event):
         avgStep_lastweek = int(np.average(df_prev_week['Step']))
 
 
-        #matplotlib.rc('font', family='Microsoft JhengHei')
+        matplotlib.rc('font', family='Microsoft JhengHei')
         plt.figure(figsize=(10, 6))
         bars = plt.bar(df_daliy.index, df_daliy['Step'], width=0.8, align='center', color='#60b8b3')
 
@@ -1314,7 +1314,7 @@ def handle_postback(event):
         df_hr = df.resample('1h').mean()
         df_yesterday = df_hr.loc[start_date]
 
-        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=8)
+        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=12)
 
         bins = [0, 23, 27, 31, 35, 100] 
         labels = [0, 1, 2, 3, 4]
@@ -1339,7 +1339,7 @@ def handle_postback(event):
         df2_yesterday = df2.loc[start_date]
         FatigueAlert = int(df2_yesterday['FatigueAlert'])
 
-        #rcParams['font.family'] = 'Microsoft JhengHei'
+        rcParams['font.family'] = 'Microsoft JhengHei'
 
         def render_mpl_table(data, col_width=2.0, row_height=0.5, font_size=12,
                             header_color='#40466e', row_colors=['#f1f1f2', 'w'], edge_color='w',
@@ -1372,7 +1372,7 @@ def handle_postback(event):
                         cell.set_facecolor(color)
                         cell.set_text_props(color='black', fontproperties=font_prop)
                     else:
-                        cell.set_facecolor(row_colors[k[0] % len(row_colors)])
+                        cell.set_facecolor(row_colors[k[0] % len(row_colors)])####
             
 
             fig.subplots_adjust(top=0.75)  # 調整頂部
@@ -1496,8 +1496,8 @@ def handle_postback(event):
         file_path = './sleep.csv'
         df = pd.read_csv(file_path, encoding='big5')
 
-        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf')
-        
+        font_prop = FontProperties(fname='./NotoSansTC-VariableFont_wght.ttf', size=12)###
+
         # 將 StartTime 和 EndTime 轉換為 datetime 格式
         df['StartTime'] = pd.to_datetime(df['StartTime'])
         df['EndTime'] = pd.to_datetime(df['EndTime'])
@@ -1663,12 +1663,12 @@ def handle_postback(event):
         ax.set_xticks(ticks)
 
         # 添加標籤和標題
-        ax.set_xlabel('時間', fontproperties=font_prop)
+        ax.set_xlabel('時間', fontproperties=font_prop)###
         ax.set_yticks([])
         month = datetime.strptime(start_date, '%Y-%m-%d').month
         day = datetime.strptime(start_date, '%Y-%m-%d').day
         title_date = f'{month}月{day}日 睡眠'
-        ax.set_title(title_date, fontproperties=font_prop)
+        ax.set_title(title_date, fontproperties=font_prop)###
 
         # 將'持續時間'列轉換為數字
         daily_sleep_df['Duration'] = pd.to_numeric(daily_sleep_df['Duration'], errors='coerce')
@@ -1726,21 +1726,21 @@ def handle_postback(event):
             summary_text4 = f'轉醒時長：{awake_duration%60}分'
         else:
             summary_text4 = f'轉醒時長：{awake_duration // 60}小時{awake_duration % 60}分'    
-
+        ###
         if(wake_count > 0):
             summary_text5 = f'轉醒次數：{wake_count}次'
-        plt.figtext(0.07, 0.45, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.4, summary_text5, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.3, summary_text2, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.25, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)
-        plt.figtext(0.07, 0.2, summary_text4, ha='left', fontsize=12, fontproperties=font_prop)
+        plt.figtext(0.07, 0.45, summary_text1, ha='left', fontsize=12, fontproperties=font_prop)###
+        plt.figtext(0.07, 0.4, summary_text5, ha='left', fontsize=12, fontproperties=font_prop)###
+        plt.figtext(0.07, 0.3, summary_text2, ha='left', fontsize=12, fontproperties=font_prop)###
+        plt.figtext(0.07, 0.25, summary_text3, ha='left', fontsize=12, fontproperties=font_prop)###
+        plt.figtext(0.07, 0.2, summary_text4, ha='left', fontsize=12, fontproperties=font_prop)###
 
         # 添加圖例，順序為淺眠、深眠、醒
         legend_labels = ['淺眠', '深眠', '醒']
         legend_colors = [color_map[label] for label in legend_labels]
         legend_patches = [plt.Rectangle((0, 0), 1, 1, facecolor=color) for color in legend_colors]
         #plt.legend(legend_patches, legend_labels, loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.legend(legend_patches, legend_labels, prop=font_prop)
+        plt.legend(legend_patches, legend_labels, prop=font_prop)###
 
         # 在右下角添加圓餅圖
         pie_ax = fig.add_axes([0.5, 0.05, 0.4, 0.4])  # [left, bottom, width, height]
@@ -1748,13 +1748,14 @@ def handle_postback(event):
         sizes = [shallow_sleep_duration, deep_sleep_duration, awake_duration]
         colors = ['#60b8b3', '#437e7b', '#FF8040']
         
-        # 應用 font_prop 到圓餅圖的標籤
+
+        ### 應用 font_prop 到圓餅圖的標籤
         texts = pie_ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
         for text in texts[1]:  # texts[1] 包含標籤
-            text.set_fontproperties(font_prop)
+            text.set_fontproperties(font_prop)###
         for text in texts[2]:  # texts[2] 包含百分比
-            text.set_fontproperties(font_prop)
-        
+            text.set_fontproperties(font_prop)###
+
         # 顯示圖表
         # plt.xticks(rotation=45)
         plt.tight_layout()
@@ -1855,7 +1856,7 @@ def handle_postback(event):
         }
 
         fig, ax = plt.subplots(figsize=(10, 6))
-        #rcParams['font.sans-serif'] = ['Microsoft JhengHei']
+        rcParams['font.sans-serif'] = ['Microsoft JhengHei']
         rcParams['axes.unicode_minus'] = False
         # 畫圖
         for i, date in enumerate(unique_dates):
